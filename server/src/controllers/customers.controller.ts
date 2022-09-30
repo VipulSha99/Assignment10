@@ -4,28 +4,24 @@ import {
   Filter,
   FilterExcludingWhere,
   repository,
-  Where,
+  Where
 } from '@loopback/repository';
 import {
-  post,
-  param,
-  get,
-  getModelSchemaRef,
-  patch,
-  put,
-  del,
-  requestBody,
-  response,
+  del, get,
+  getModelSchemaRef, param, patch, post, put, requestBody,
+  response
 } from '@loopback/rest';
+import { authenticate, STRATEGY } from 'loopback4-authentication';
 import {Customer} from '../models';
 import {CustomerRepository} from '../repositories';
 
-export class CustomerController {
+export class CustomersController {
   constructor(
     @repository(CustomerRepository)
-    public customerRepository : CustomerRepository,
+    public customerRepository: CustomerRepository,
   ) {}
 
+  @authenticate(STRATEGY.BEARER)
   @post('/customers')
   @response(200, {
     description: 'Customer model instance',
@@ -47,17 +43,17 @@ export class CustomerController {
     return this.customerRepository.create(customer);
   }
 
+  @authenticate(STRATEGY.BEARER)
   @get('/customers/count')
   @response(200, {
     description: 'Customer model count',
     content: {'application/json': {schema: CountSchema}},
   })
-  async count(
-    @param.where(Customer) where?: Where<Customer>,
-  ): Promise<Count> {
+  async count(@param.where(Customer) where?: Where<Customer>): Promise<Count> {
     return this.customerRepository.count(where);
   }
 
+  // @authenticate(STRATEGY.BEARER)
   @get('/customers')
   @response(200, {
     description: 'Array of Customer model instances',
@@ -73,9 +69,10 @@ export class CustomerController {
   async find(
     @param.filter(Customer) filter?: Filter<Customer>,
   ): Promise<Customer[]> {
-    return this.customerRepository.find(filter);
+    return this.customerRepository.find({include: ['users']});
   }
 
+  @authenticate(STRATEGY.BEARER)
   @patch('/customers')
   @response(200, {
     description: 'Customer PATCH success count',
@@ -95,6 +92,7 @@ export class CustomerController {
     return this.customerRepository.updateAll(customer, where);
   }
 
+  @authenticate(STRATEGY.BEARER)
   @get('/customers/{id}')
   @response(200, {
     description: 'Customer model instance',
@@ -106,11 +104,13 @@ export class CustomerController {
   })
   async findById(
     @param.path.string('id') id: string,
-    @param.filter(Customer, {exclude: 'where'}) filter?: FilterExcludingWhere<Customer>
+    @param.filter(Customer, {exclude: 'where'})
+    filter?: FilterExcludingWhere<Customer>,
   ): Promise<Customer> {
     return this.customerRepository.findById(id, {include: ['users']});
   }
 
+  @authenticate(STRATEGY.BEARER)
   @patch('/customers/{id}')
   @response(204, {
     description: 'Customer PATCH success',
@@ -126,10 +126,11 @@ export class CustomerController {
     })
     customer: Customer,
   ): Promise<void> {
-    customer.updatedAt=new Date();
+    customer.updatedAt = new Date();
     await this.customerRepository.updateById(id, customer);
   }
 
+  @authenticate(STRATEGY.BEARER)
   @put('/customers/{id}')
   @response(204, {
     description: 'Customer PUT success',
@@ -141,6 +142,7 @@ export class CustomerController {
     await this.customerRepository.replaceById(id, customer);
   }
 
+  @authenticate(STRATEGY.BEARER)
   @del('/customers/{id}')
   @response(204, {
     description: 'Customer DELETE success',

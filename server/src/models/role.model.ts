@@ -1,11 +1,5 @@
-import {Entity, model, property, hasMany} from '@loopback/repository';
+import {Entity, hasMany, model, property} from '@loopback/repository';
 import {User, UserWithRelations} from './user.model';
-
-enum QueryLanguage {
-  'A',
-  'SA',
-  'S',
-}
 
 @model({name: 'role',settings: {strict: true}})
 export class Role extends Entity {
@@ -14,28 +8,19 @@ export class Role extends Entity {
     id: true,
     defaultFn: 'uuidv4',
   })
-  id?: string;
+  key?: string;
 
   @property({
     type: 'string',
     required: true,
   })
-  name: string;
+  role: string;
 
   @property({
     type: 'string',
-    required: true,
-    jsonSchema: {
-      enum: Object.values(QueryLanguage),
-    },
   })
-  key: QueryLanguage;
+  description?: string;
 
-  @property({
-    type: 'string',
-    required: true,
-  })
-  description: string;
   @property({
     type: 'date',
     default: () => new Date(),
@@ -48,7 +33,7 @@ export class Role extends Entity {
   })
   updatedAt?: Date;
 
-  @hasMany(() => User)
+  @hasMany(() => User, {keyTo: 'rolekey'})
   users: User[];
 
   constructor(data?: Partial<Role>) {

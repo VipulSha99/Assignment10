@@ -26,13 +26,15 @@ export class UserAddComponent implements OnInit {
       this.customers = newData;
     });
     this.addUserForm = new FormGroup({
-      'firstName': new FormControl(null,[Validators.required]),
+      'firstName': new FormControl(null,[Validators.required,Validators.minLength(3)]),
       'middleName':new FormControl(''),
-      'lastName':new FormControl(null,[Validators.required]),
+      'lastName':new FormControl(null,[Validators.required,Validators.minLength(3)]),
       'email':new FormControl(null,[Validators.required,Validators.email]),
       'phoneNumber':new FormControl(null,[Validators.required]),
       'customerId':new FormControl(null,[Validators.required]),
-      'roleId':new FormControl(null,[Validators.required,this.forbiddenNames.bind(this)]),
+      'rolekey':new FormControl(null,[Validators.required,this.forbiddenNames.bind(this)]),
+      'username':new FormControl(null,[Validators.required, Validators.minLength(3)]),
+      'password':new FormControl(null,[Validators.required, Validators.minLength(8)]),
       'address':new FormControl(null,[Validators.required])
     })
   }
@@ -47,12 +49,12 @@ export class UserAddComponent implements OnInit {
       let role:role;
       this.roleService.getRole().subscribe(response=>{
         response.map(data=>{
-          if(data.name==this.addUserForm.value.roleId){
+          if(data.role==this.addUserForm.value.rolekey){
             role=data;
           }
         })
         let userFormData = this.addUserForm.value;
-        userFormData['roleId']=role.id;
+        userFormData['rolekey']=role.key;
         console.log(userFormData);
         this.userService.addUser(userFormData).subscribe(responseData=>{
           this.addUserForm.reset();

@@ -1,5 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
+import { CookieService } from 'ngx-cookie';
 import {environment} from '../../environments/environment';
 import { customerModel } from './customer.model';
 
@@ -8,24 +10,46 @@ import { customerModel } from './customer.model';
 })
 export class CustomerService {
 
-  constructor(private http: HttpClient) { }
+  customerBaseUrl = environment.BASE_URL_CUSTOMERS;
+
+  constructor(private http: HttpClient, private cookieService: CookieService, private router: Router) { }
 
   getCustomer(){
-    return this.http.get<customerModel[]>(environment.apiURL+'/customers');
+    const cookieUserId = this.cookieService.get("id")
+    return this.http.get<customerModel[]>(this.customerBaseUrl, { headers: { "Authorization": `Bearer ${cookieUserId}` } });
   }
   addCustomer(customerData:customerModel){
-    return this.http.post(environment.apiURL+'/customers',customerData);
+    const cookieUserId = this.cookieService.get("id")
+    if (!cookieUserId) {
+      alert(`Login Required !`)
+      this.router.navigateByUrl('')
+    }
+    return this.http.post(this.customerBaseUrl,customerData, { headers: { "Authorization": `Bearer ${cookieUserId}` } });
   }
   deleteCustomer(id:string){
-    return this.http.delete(`${environment.apiURL}/customers/${id}`);
+    const cookieUserId = this.cookieService.get("id")
+    if (!cookieUserId) {
+      alert(`Login Required !`)
+      this.router.navigateByUrl('')
+    }
+    return this.http.delete(`${this.customerBaseUrl}/${id}`, { headers: { "Authorization": `Bearer ${cookieUserId}` } });
   }
   editCustomer(id:string,userData:{[key: string]: string}){
-    console.log(userData);
-    return this.http.patch(`${environment.apiURL}/customers/${id}`,userData);
+    const cookieUserId = this.cookieService.get("id")
+    if (!cookieUserId) {
+      alert(`Login Required !`)
+      this.router.navigateByUrl('')
+    }
+    return this.http.patch(`${this.customerBaseUrl}/${id}`,userData, { headers: { "Authorization": `Bearer ${cookieUserId}` } });
   }
 
   getSelectedCustomer(id:string){
-    return this.http.get<customerModel>(`${environment.apiURL}/customers/${id}`);
+    const cookieUserId = this.cookieService.get("id")
+    if (!cookieUserId) {
+      alert(`Login Required !`)
+      this.router.navigateByUrl('')
+    }
+    return this.http.get<customerModel>(`${this.customerBaseUrl}/${id}`, { headers: { "Authorization": `Bearer ${cookieUserId}` } });
   }
 
 }

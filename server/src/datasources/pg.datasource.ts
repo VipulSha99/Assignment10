@@ -1,17 +1,15 @@
 import {inject, lifeCycleObserver, LifeCycleObserver} from '@loopback/core';
 import {juggler} from '@loopback/repository';
-import * as dotenv from 'dotenv';
-dotenv.config();
 
 const config = {
-  name: 'postgresdb',
+  name: 'pg',
   connector: 'postgresql',
-  // url: 'postgresql://$vipul:$vipul123@$localhost:$5432/$myLoopbackdb',
-  host: process.env.HOST,
-  port: process.env.PORT,
-  user: process.env.DBUSERNAME,
-  password: process.env.PASSWORD,
-  database: process.env.DATABASE,
+  // url: 'postgres://postgres:leomessi@localhost/sf_loopback',
+  host: 'HOST',
+  port: 'PORT',
+  user: 'DBUSERNAME',
+  password: 'PASSWORD',
+  database: 'DATABASE',
 };
 
 // Observe application's life cycle to disconnect the datasource when
@@ -19,17 +17,24 @@ const config = {
 // gracefully. The `stop()` method is inherited from `juggler.DataSource`.
 // Learn more at https://loopback.io/doc/en/lb4/Life-cycle.html
 @lifeCycleObserver('datasource')
-export class PostgresdbDataSource
+export class PgDataSource
   extends juggler.DataSource
   implements LifeCycleObserver
 {
-  static dataSourceName = 'postgresdb';
+  static dataSourceName = 'pg';
   static readonly defaultConfig = config;
 
   constructor(
-    @inject('datasources.config.postgresdb', {optional: true})
+    @inject('datasources.config.pg', {optional: true})
     dsConfig: object = config,
   ) {
+    Object.assign(dsConfig, {
+      host: process.env.HOST,
+      port: process.env.PORT,
+      user: process.env.DBUSERNAME,
+      password: process.env.PASSWORD,
+      database: process.env.DATABASE,
+    });
     super(dsConfig);
   }
 }

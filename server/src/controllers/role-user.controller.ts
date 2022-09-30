@@ -3,7 +3,7 @@ import {
   CountSchema,
   Filter,
   repository,
-  Where,
+  Where
 } from '@loopback/repository';
 import {
   del,
@@ -13,11 +13,11 @@ import {
   param,
   patch,
   post,
-  requestBody,
+  requestBody
 } from '@loopback/rest';
 import {
   Role,
-  User,
+  User
 } from '../models';
 import {RoleRepository} from '../repositories';
 
@@ -54,14 +54,14 @@ export class RoleUserController {
     },
   })
   async create(
-    @param.path.string('id') id: typeof Role.prototype.id,
+    @param.path.number('id') id: typeof Role.prototype.key,
     @requestBody({
       content: {
         'application/json': {
           schema: getModelSchemaRef(User, {
             title: 'NewUserInRole',
             exclude: ['id'],
-            optional: ['roleId']
+            optional: ['rolekey']
           }),
         },
       },

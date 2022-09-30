@@ -1,4 +1,4 @@
-import {Entity, model, property, hasMany} from '@loopback/repository';
+import {Entity, hasMany, model, property} from '@loopback/repository';
 import {User, UserWithRelations} from './user.model';
 
 @model({name:'customer',settings: {strict: true}})
@@ -13,20 +13,21 @@ export class Customer extends Entity {
   @property({
     type: 'string',
     required: true,
+    postgresql: {
+      unique: true,
+    },
   })
   name: string;
 
   @property({
     type: 'string',
-    required: true,
   })
-  website: string;
+  website?: string;
 
   @property({
     type: 'string',
-    required: true,
   })
-  address: string;
+  address?: string;
 
   @property({
     type: 'date',

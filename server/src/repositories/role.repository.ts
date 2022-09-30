@@ -1,19 +1,19 @@
 import {inject, Getter} from '@loopback/core';
 import {DefaultCrudRepository, repository, HasManyRepositoryFactory} from '@loopback/repository';
-import {PostgresdbDataSource} from '../datasources';
+import {PgDataSource} from '../datasources';
 import {Role, RoleRelations, User} from '../models';
 import {UserRepository} from './user.repository';
 
 export class RoleRepository extends DefaultCrudRepository<
   Role,
-  typeof Role.prototype.id,
+  typeof Role.prototype.key,
   RoleRelations
 > {
 
-  public readonly users: HasManyRepositoryFactory<User, typeof Role.prototype.id>;
+  public readonly users: HasManyRepositoryFactory<User, typeof Role.prototype.key>;
 
   constructor(
-    @inject('datasources.postgresdb') dataSource: PostgresdbDataSource, @repository.getter('UserRepository') protected userRepositoryGetter: Getter<UserRepository>,
+    @inject('datasources.pg') dataSource: PgDataSource, @repository.getter('UserRepository') protected userRepositoryGetter: Getter<UserRepository>,
   ) {
     super(Role, dataSource);
     this.users = this.createHasManyRepositoryFactoryFor('users', userRepositoryGetter,);

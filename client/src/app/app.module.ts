@@ -1,6 +1,6 @@
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
-import { ReactiveFormsModule} from '@angular/forms';
+import { FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppComponent } from './app.component';
@@ -13,6 +13,9 @@ import {AppRoutingModule} from './app-routing.module';
 import { CustomerAddComponent } from './customer/customer-add/customer-add.component';
 import { CustomerDetailComponent } from './customer/customer-detail/customer-detail.component';
 import { CustomerTableComponent } from './customer/customer-table/customer-table.component';
+import { LoginComponent } from './login/login.component';
+import { CookieModule } from 'ngx-cookie';
+import { RegisterComponent } from './register/register.component';
 
 @NgModule({
   declarations: [
@@ -24,13 +27,17 @@ import { CustomerTableComponent } from './customer/customer-table/customer-table
     UserTableComponent,
     CustomerAddComponent,
     CustomerDetailComponent,
-    CustomerTableComponent
+    CustomerTableComponent,
+    LoginComponent,
+    RegisterComponent
   ],
   imports: [
     BrowserModule,
     ReactiveFormsModule,
     HttpClientModule,
-    AppRoutingModule
+    AppRoutingModule,
+    FormsModule,
+    CookieModule.withOptions(),
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { CookieService } from 'ngx-cookie';
 
 @Component({
   selector: 'app-root',
@@ -6,4 +7,17 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
+  constructor(private cookieService:CookieService){}
+
+  checkLogin(){
+    const id=this.cookieService.get("id")
+    if(!id)
+    return false;
+    else
+    return true;
+  }
+
+  logOut(){
+    this.cookieService.remove("id")
+  }
 }

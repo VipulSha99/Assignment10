@@ -1,30 +1,92 @@
+import {inject, service} from '@loopback/core';
 import {
   Count,
   CountSchema,
-  Filter,
-  FilterExcludingWhere,
-  repository,
-  Where,
+  Filter, repository,
+  Where
 } from '@loopback/repository';
 import {
-  post,
-  param,
-  get,
-  getModelSchemaRef,
-  patch,
-  put,
-  del,
-  requestBody,
+  del, get,
+  getModelSchemaRef, param, patch, post, put, requestBody,
   response,
+  SchemaObject
 } from '@loopback/rest';
+import {securityId, UserProfile} from '@loopback/security';
+import {
+  authenticate,
+  AuthenticationBindings,
+  STRATEGY
+} from 'loopback4-authentication';
 import {User} from '../models';
 import {UserRepository} from '../repositories';
+import { BcryptHasher } from '../services/hash.password.bcrypt';
+import {jwtService} from '../services/jwt.service';
+
+const CredentialsSchema: SchemaObject = {
+  type: 'object',
+  required: ['username', 'password'],
+  properties: {
+    username: {
+      type: 'string',
+    },
+    password: {
+      type: 'string',
+    },
+  },
+};
+
+export const LoginRequestBody = {
+  description: 'Login Endpoint inputs',
+  required: true,
+  content: {
+    'application/json': {schema: CredentialsSchema},
+  },
+};
 
 export class UserController {
   constructor(
     @repository(UserRepository)
-    public userRepository : UserRepository,
+    public userRepository: UserRepository,
+    @service(jwtService)
+    public jwtService: jwtService,
+    @inject('hash.password.bcrypt') public hasher: BcryptHasher,
   ) {}
+
+  @authenticate(STRATEGY.LOCAL)
+  @post('/users/login', {
+    responses: {
+      '200': {
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+            },
+          },
+        },
+      },
+    },
+  })
+  async login(
+    @requestBody(LoginRequestBody)
+    credentials: {
+      username: 'string';
+      password: 'string';
+    },
+    @inject(AuthenticationBindings.CURRENT_USER)
+    currentUser: User,
+  ): Promise<{token: string}> {
+    console.log('credentials', credentials);
+    console.log('logged in user', currentUser);
+    const user: UserProfile = {
+      [securityId]: currentUser.id!.toString(),
+      id: currentUser.id,
+      username: currentUser.username,
+      firstname: currentUser.firstName,
+    };
+
+    const token = await this.jwtService.generateToken(user);
+    return {token};
+  }
 
   @post('/users')
   @response(200, {
@@ -44,20 +106,21 @@ export class UserController {
     })
     user: Omit<User, 'id'>,
   ): Promise<User> {
+    user.password = await this.hasher.hashPassword(user.password!)
     return this.userRepository.create(user);
   }
 
+  @authenticate(STRATEGY.BEARER)
   @get('/users/count')
   @response(200, {
     description: 'User model count',
     content: {'application/json': {schema: CountSchema}},
   })
-  async count(
-    @param.where(User) where?: Where<User>,
-  ): Promise<Count> {
+  async count(@param.where(User) where?: Where<User>): Promise<Count> {
     return this.userRepository.count(where);
   }
 
+  @authenticate(STRATEGY.BEARER)
   @get('/users')
   @response(200, {
     description: 'Array of User model instances',
@@ -70,12 +133,13 @@ export class UserController {
       },
     },
   })
-  async find(
-    // @param.filter(User) filter?: Filter<User>,
-  ): Promise<User[]> {
-    return this.userRepository.find({include:["customer","role"]});
+  async find(@param.filter(User) filter?: Filter<User>): Promise<User[]> {
+    return this.userRepository.find({
+      include: [{relation: 'customer'}, {relation: 'Role'}],
+    });
   }
 
+  @authenticate(STRATEGY.BEARER)
   @patch('/users')
   @response(200, {
     description: 'User PATCH success count',
@@ -95,6 +159,7 @@ export class UserController {
     return this.userRepository.updateAll(user, where);
   }
 
+  @authenticate(STRATEGY.BEARER)
   @get('/users/{id}')
   @response(200, {
     description: 'User model instance',
@@ -104,13 +169,13 @@ export class UserController {
       },
     },
   })
-  async findById(
-    @param.path.string('id') id: string,
-    @param.filter(User, {exclude: 'where'}) filter?: FilterExcludingWhere<User>
-  ): Promise<User> {
-    return this.userRepository.findById(id, {include:["customer","role"]});
+  async findById(@param.path.string('id') id: string): Promise<User> {
+    return this.userRepository.findById(id, {
+      include: [{relation: 'customer'}, {relation: 'Role'}],
+    });
   }
 
+  @authenticate(STRATEGY.BEARER)
   @patch('/users/{id}')
   @response(204, {
     description: 'User PATCH success',
@@ -130,6 +195,7 @@ export class UserController {
     await this.userRepository.updateById(id, user);
   }
 
+  @authenticate(STRATEGY.BEARER)
   @put('/users/{id}')
   @response(204, {
     description: 'User PUT success',
@@ -141,6 +207,7 @@ export class UserController {
     await this.userRepository.replaceById(id, user);
   }
 
+  @authenticate(STRATEGY.BEARER)
   @del('/users/{id}')
   @response(204, {
     description: 'User DELETE success',
