@@ -3,16 +3,35 @@ import {HttpClient} from '@angular/common/http';
 import { map } from 'rxjs';
 import {environment} from '../../environments/environment';
 import { UserModel } from './user.model';
+import { CookieService } from 'ngx-cookie';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
 
-  constructor(private http: HttpClient) { }
+  userBaseUrl = environment.BASE_URL_USERS;
+
+  constructor(private http: HttpClient, private cookieService: CookieService, private router: Router) { }
+
+  login(credentials: { username: string, password: string }) {
+
+    const credentialsToSend={
+      username:credentials.username,
+      password:credentials.password
+    }
+    return this.http.post(`${this.userBaseUrl}/login`, credentialsToSend)
+  }
 
   getUsers(){
-    return this.http.get<{[key: string]:UserModel}>(environment.apiURL+'/users').pipe(
+    const cookieUserId = this.cookieService.get("id")
+    if (!cookieUserId) {
+      alert(`Login Required !`)
+      this.router.navigateByUrl('')
+    }
+    return this.http.get<{[key: string]:UserModel}>(this.userBaseUrl,{ 
+      headers: { "Authorization": `Bearer ${cookieUserId}` } }).pipe(
       map((responseData)=>{
         const userArray:UserModel[] = [];
         for (const key in responseData){
@@ -26,18 +45,37 @@ export class UserService {
   }
 
   deleteUser(id:string){
-    return this.http.delete(`${environment.apiURL}/users/${id}`);
+    const cookieUserId = this.cookieService.get("id")
+    if (!cookieUserId) {
+      alert(`Login Required !`)
+      this.router.navigateByUrl('')
+    }
+    return this.http.delete(`${this.userBaseUrl}/${id}`, { headers: { "Authorization": `Bearer ${cookieUserId}` } });
   }
 
   addUser(userData:UserModel){
-    return this.http.post(environment.apiURL+'/users',userData);
+    const cookieUserId = this.cookieService.get("id")
+    // if (!cookieUserId) {
+    //   alert(`Login Required !`)
+    //   this.router.navigateByUrl('')
+    // }
+    return this.http.post(this.userBaseUrl,userData, { headers: { "Authorization": `Bearer ${cookieUserId}` } });
   }
 
   editUser(id:string,userData:{[key: string]: string|number}){
-    console.log(userData);
-    return this.http.patch(`${environment.apiURL}/users/${id}`,userData);
+    const cookieUserId = this.cookieService.get("id")
+    if (!cookieUserId) {
+      alert(`Login Required !`)
+      this.router.navigateByUrl('')
+    }
+    return this.http.patch(`${this.userBaseUrl}/${id}`,userData, { headers: { "Authorization": `Bearer ${cookieUserId}` } });
   }
   getSelectedUser(id:string){
-    return this.http.get<UserModel>(`${environment.apiURL}/users/${id}`);
+    const cookieUserId = this.cookieService.get("id")
+    if (!cookieUserId) {
+      alert(`Login Required !`)
+      this.router.navigateByUrl('')
+    }
+    return this.http.get<UserModel>(`${this.userBaseUrl}/${id}`, { headers: { "Authorization": `Bearer ${cookieUserId}` } });
   }
 }

@@ -3,7 +3,7 @@ import {
   CountSchema,
   Filter,
   repository,
-  Where,
+  Where
 } from '@loopback/repository';
 import {
   del,
@@ -13,11 +13,11 @@ import {
   param,
   patch,
   post,
-  requestBody,
+  requestBody
 } from '@loopback/rest';
 import {
   Customer,
-  User,
+  User
 } from '../models';
 import {CustomerRepository} from '../repositories';
 
@@ -54,7 +54,7 @@ export class CustomerUserController {
     },
   })
   async create(
-    @param.path.string('id') id: typeof Customer.prototype.id,
+    @param.path.number('id') id: typeof Customer.prototype.id,
     @requestBody({
       content: {
         'application/json': {

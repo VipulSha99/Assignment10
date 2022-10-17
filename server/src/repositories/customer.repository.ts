@@ -1,6 +1,6 @@
 import {inject, Getter} from '@loopback/core';
 import {DefaultCrudRepository, repository, HasManyRepositoryFactory} from '@loopback/repository';
-import {PostgresdbDataSource} from '../datasources';
+import {PgDataSource} from '../datasources';
 import {Customer, CustomerRelations, User} from '../models';
 import {UserRepository} from './user.repository';
 
@@ -13,7 +13,7 @@ export class CustomerRepository extends DefaultCrudRepository<
   public readonly users: HasManyRepositoryFactory<User, typeof Customer.prototype.id>;
 
   constructor(
-    @inject('datasources.postgresdb') dataSource: PostgresdbDataSource, @repository.getter('UserRepository') protected userRepositoryGetter: Getter<UserRepository>,
+    @inject('datasources.pg') dataSource: PgDataSource, @repository.getter('UserRepository') protected userRepositoryGetter: Getter<UserRepository>,
   ) {
     super(Customer, dataSource);
     this.users = this.createHasManyRepositoryFactoryFor('users', userRepositoryGetter,);

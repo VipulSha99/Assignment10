@@ -31,8 +31,8 @@ export class UserRoleController {
     },
   })
   async getRole(
-    @param.path.string('id') id: typeof User.prototype.id,
+    @param.path.number('id') id: typeof User.prototype.id,
   ): Promise<Role> {
-    return this.userRepository.role(id);
+    return this.userRepository.Role(id);
   }
 }

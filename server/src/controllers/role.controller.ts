@@ -37,12 +37,12 @@ export class RoleController {
         'application/json': {
           schema: getModelSchemaRef(Role, {
             title: 'NewRole',
-            exclude: ['id'],
+            exclude: ['key'],
           }),
         },
       },
     })
-    role: Omit<Role, 'id'>,
+    role: Omit<Role, 'key'>,
   ): Promise<Role> {
     return this.roleRepository.create(role);
   }

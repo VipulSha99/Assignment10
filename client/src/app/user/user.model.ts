@@ -7,7 +7,7 @@ export interface User{
     lastName: nString,
     email: nString,
     phoneNumber: number,
-    role: [name:nString],
+    Role: [role:nString],
     customer:[name:nString],
     address: nString,
     createdAt?: string
@@ -19,7 +19,7 @@ export class UserModel {
     lastName: nString;
     email: nString;
     phoneNumber: number;
-    role: {name:nString};
+    Role: {role:nString};
     customer:{name:nString};
     address: nString;
     customerId?: nString;
