@@ -3,7 +3,8 @@ import {
   Count,
   CountSchema,
   Filter, repository,
-  Where
+  Where,
+  FilterExcludingWhere
 } from '@loopback/repository';
 import {
   del, get,
@@ -134,9 +135,7 @@ export class UserController {
     },
   })
   async find(@param.filter(User) filter?: Filter<User>): Promise<User[]> {
-    return this.userRepository.find({
-      include: [{relation: 'customer'}, {relation: 'Role'}],
-    });
+    return this.userRepository.find(filter);
   }
 
   @authenticate(STRATEGY.BEARER)
@@ -169,10 +168,9 @@ export class UserController {
       },
     },
   })
-  async findById(@param.path.string('id') id: string): Promise<User> {
-    return this.userRepository.findById(id, {
-      include: [{relation: 'customer'}, {relation: 'Role'}],
-    });
+  async findById(@param.path.string('id') id: string,
+  @param.filter(User, {exclude: 'where'}) filter?: FilterExcludingWhere<User>): Promise<User> {
+    return this.userRepository.findById(id,filter)
   }
 
   @authenticate(STRATEGY.BEARER)

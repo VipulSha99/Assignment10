@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import { map } from 'rxjs';
+import {map } from 'rxjs';
 import {environment} from '../../environments/environment';
 import { UserModel } from './user.model';
 import { CookieService } from 'ngx-cookie';
@@ -30,7 +30,8 @@ export class UserService {
       alert(`Login Required !`)
       this.router.navigateByUrl('')
     }
-    return this.http.get<{[key: string]:UserModel}>(this.userBaseUrl,{ 
+    let parameter = 'filter={"include":["customer","Role"]}';
+    return this.http.get<{[key: string]:UserModel}>(this.userBaseUrl+'?'+parameter,{ 
       headers: { "Authorization": `Bearer ${cookieUserId}` } }).pipe(
       map((responseData)=>{
         const userArray:UserModel[] = [];
@@ -55,10 +56,6 @@ export class UserService {
 
   addUser(userData:UserModel){
     const cookieUserId = this.cookieService.get("id")
-    // if (!cookieUserId) {
-    //   alert(`Login Required !`)
-    //   this.router.navigateByUrl('')
-    // }
     return this.http.post(this.userBaseUrl,userData, { headers: { "Authorization": `Bearer ${cookieUserId}` } });
   }
 
@@ -76,6 +73,7 @@ export class UserService {
       alert(`Login Required !`)
       this.router.navigateByUrl('')
     }
-    return this.http.get<UserModel>(`${this.userBaseUrl}/${id}`, { headers: { "Authorization": `Bearer ${cookieUserId}` } });
+    let parameter = 'filter={"include":["customer","Role"]}';
+    return this.http.get<UserModel>(`${this.userBaseUrl}/${id}?${parameter}`, { headers: { "Authorization": `Bearer ${cookieUserId}` } });
   }
 }

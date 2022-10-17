@@ -53,7 +53,6 @@ export class CustomersController {
     return this.customerRepository.count(where);
   }
 
-  // @authenticate(STRATEGY.BEARER)
   @get('/customers')
   @response(200, {
     description: 'Array of Customer model instances',
@@ -69,7 +68,7 @@ export class CustomersController {
   async find(
     @param.filter(Customer) filter?: Filter<Customer>,
   ): Promise<Customer[]> {
-    return this.customerRepository.find({include: ['users']});
+    return this.customerRepository.find(filter);
   }
 
   @authenticate(STRATEGY.BEARER)
@@ -107,7 +106,7 @@ export class CustomersController {
     @param.filter(Customer, {exclude: 'where'})
     filter?: FilterExcludingWhere<Customer>,
   ): Promise<Customer> {
-    return this.customerRepository.findById(id, {include: ['users']});
+    return this.customerRepository.findById(id, filter);
   }
 
   @authenticate(STRATEGY.BEARER)
